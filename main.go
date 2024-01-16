@@ -3,18 +3,19 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/F1sssss/goecom/cmd/pkg/database"
-	"github.com/F1sssss/goecom/cmd/pkg/handlers"
+	"github.com/F1sssss/goecom/cmd/pkg/middleware"
 	"github.com/F1sssss/goecom/cmd/pkg/models"
+	"github.com/F1sssss/goecom/cmd/pkg/routes"
 	"github.com/labstack/echo"
+	"gorm.io/gorm"
 )
 
-func main() {
+func InitializeDatabaseConnection() *gorm.DB { // Connect to the database
 	db, err := database.Connect()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	// Check if the connection is successful
@@ -25,21 +26,45 @@ func main() {
 
 	fmt.Printf("Connected to the database successfully! Result: %d\n", result)
 
-	Product := models.Product{}
-	db.AutoMigrate(&Product)
+	return db
+}
+
+func MigrateSchemas(e *gorm.DB) {
+	err := e.AutoMigrate(&models.Product{})
+	if err != nil {
+		panic(err)
+	}
+	err2 := e.AutoMigrate(&models.Role{})
+
+	if err2 != nil {
+		panic(err2)
+	}
+
+	err3 := e.AutoMigrate(&models.User{})
+	if err3 != nil {
+		panic(err3)
+	}
+
+}
+
+func main() {
+
+	db := InitializeDatabaseConnection()
+	MigrateSchemas(db)
 
 	e := echo.New()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	// Middleware
+	e.Use(middleware.DatabaseMiddleware)
 
-	e.GET("/products", handlers.GetProducts)
+	// Routes
+	routes.InitProductRoutes(e)
+	routes.InitAuthRoutes(e)
 
+	// Start server
 	if err := e.Start(":8080"); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
 	fmt.Println("Server started successfully")
-	fmt.Println(result)
 
 }

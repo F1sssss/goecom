@@ -1,0 +1,35 @@
+# .gitignore
+# Go specific
+*.exe
+*.dll
+*.exe~
+*.dll~
+*.exe.sig
+*.dll.sig
+*.test
+*.prof
+
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Output of the golang-nuts code review tool
+*.comment
+
+# Build directory
+/build/
+
+# Ignore the vendor directory
+/vendor/
+
+# Ignore the binary folder
+/bin/
