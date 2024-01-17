@@ -11,7 +11,7 @@ func InitProductRoutes(e *echo.Echo) {
 
 	protectedGroup := e.Group("/products", middleware.IsAuthorized)
 
-	protectedGroup.GET("", handlers.GetProducts)
+	e.GET("/products", handlers.GetProducts)
 	protectedGroup.GET("/:id", handlers.GetProduct)
 	protectedGroup.POST("", handlers.CreateProduct)
 	protectedGroup.PATCH("/:id", handlers.UpdateProduct)
