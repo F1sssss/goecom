@@ -70,7 +70,7 @@ func Login(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	token, err := utils.GenerateJWT(user.Username, user.Email, user.Role)
+	token, err := utils.GenerateJWT(user.Username, uint64(user.ID), user.Email, user.Role)
 
 	if err != nil {
 		fmt.Println("Error generating JWT token:", err)

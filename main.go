@@ -30,19 +30,29 @@ func InitializeDatabaseConnection() *gorm.DB { // Connect to the database
 }
 
 func MigrateSchemas(e *gorm.DB) {
-	err := e.AutoMigrate(&models.Product{})
-	if err != nil {
+
+	if err := e.AutoMigrate(&models.ProductQuantity{}); err != nil {
 		panic(err)
 	}
-	err2 := e.AutoMigrate(&models.Role{})
 
-	if err2 != nil {
-		panic(err2)
+	if err := e.AutoMigrate(&models.ShoppingCart{}); err != nil {
+		panic(err)
 	}
 
-	err3 := e.AutoMigrate(&models.User{})
-	if err3 != nil {
-		panic(err3)
+	if err := e.AutoMigrate(&models.Product{}); err != nil {
+		panic(err)
+	}
+
+	if err := e.AutoMigrate(&models.User{}); err != nil {
+		panic(err)
+	}
+
+	if err := e.AutoMigrate(&models.Role{}); err != nil {
+		panic(err)
+	}
+
+	if err := e.AutoMigrate(&models.Review{}); err != nil {
+		panic(err)
 	}
 
 }
@@ -60,6 +70,7 @@ func main() {
 	// Routes
 	routes.InitProductRoutes(e)
 	routes.InitAuthRoutes(e)
+	routes.InitUserRoutes(e)
 
 	// Start server
 	if err := e.Start(":8080"); err != nil {

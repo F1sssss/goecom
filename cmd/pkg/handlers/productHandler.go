@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo"
 )
 
+// Lock for thread safety
 var lock = sync.Mutex{}
 
 // GetProducts returns all products
@@ -44,7 +45,7 @@ func CreateProduct(c echo.Context) error {
 
 	var product models.Product
 
-	if err := CreateFactory(c, product); err != nil {
+	if err := CreateFactory(c, &product); err != nil {
 		fmt.Println("Error creating product:", err)
 		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
@@ -63,13 +64,14 @@ func UpdateProduct(c echo.Context) error {
 
 	if err := GetOneFactory(c, &product); err != nil {
 		fmt.Println("Error getting product:", err)
-		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
+		return c.JSON(http.StatusNotFound, "Product not found")
 	}
 
 	return c.JSON(http.StatusOK, product)
 
 }
 
+// DeleteProduct deletes an existing product
 func DeleteProduct(c echo.Context) error {
 
 	lock.Lock()

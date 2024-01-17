@@ -10,7 +10,6 @@ func InitUserRoutes(e *echo.Echo) {
 
 	e.GET("/users", handlers.GetUsers)
 	e.GET("/users/:id", handlers.GetUser)
-	e.POST("/users", handlers.CreateUser)
 	e.PATCH("/users/:id", handlers.UpdateUser)
 	e.DELETE("/users/:id", handlers.DeleteUser)
 

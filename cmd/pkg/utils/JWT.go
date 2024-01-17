@@ -1,20 +1,25 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/F1sssss/goecom/cmd/pkg/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type jwtCustomClaims struct {
 	Username string      `json:"username"`
+	UserID   uint64      `json:"user_id"`
 	Email    string      `json:"email"`
 	Role     models.Role `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(username string, email string, role models.Role) (string, error) {
+func GenerateJWT(username string, userID uint64, email string, role models.Role) (string, error) {
+	fmt.Println("Generating JWT for user:", username)
 	claims := &jwtCustomClaims{
 		username,
+		userID,
 		email,
 		role,
 		jwt.RegisteredClaims{},
