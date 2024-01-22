@@ -31,5 +31,3 @@ require (
 replace github.com/F1sssss/goecom/cmd/pkg/database => ./cmd/pkg/database
 
 replace github.com/F1sssss/goecom/cmd/pkg/models => ./cmd/pkg/models
-
-replace github.com/F1sssss/goecom/cmd/pkg/handlers => ./cmd/pkg/handlers

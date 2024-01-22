@@ -109,3 +109,73 @@ func AddToCart(c echo.Context) error {
 	return c.JSON(http.StatusOK, shoppingCart)
 
 }
+
+// RemoveFromCart
+func RemoveProductFromCart(c echo.Context) error {
+
+	db := c.Get("db").(*gorm.DB)
+
+	userID := c.Get("UserID")
+
+	shoppingCart := models.ShoppingCart{}
+	product := models.Product{}
+
+	// Get the product ID from the URL
+	productID := c.Param("id")
+
+	// Get the user from the database
+	if err := db.Where("user_id = ?", userID).First(&shoppingCart).Error; err != nil {
+		fmt.Println("Error finding users Shopping cart:", err)
+		return c.JSON(http.StatusInternalServerError, "Error finding users Shopping cart")
+	}
+
+	// Get the product from the database
+	if err := db.Where("id = ?", productID).First(&product).Error; err != nil {
+		fmt.Println("Error finding product:", err)
+		return c.JSON(http.StatusInternalServerError, "Error finding product")
+	}
+
+	// Check if the product is in the shopping cart
+	productQuantity := models.ProductQuantity{}
+	if err := db.Where("product_id = ?", product.ID).Where("shopping_cart_id = ?", shoppingCart.ID).First(&productQuantity).Error; err != nil {
+		fmt.Println("Error finding product quantity:", err)
+		return c.JSON(http.StatusInternalServerError, "Error finding product quantity")
+	}
+
+	// Remove the product from the shopping cart
+	if err := db.Delete(&productQuantity).Error; err != nil {
+		fmt.Println("Error deleting product quantity:", err)
+		return c.JSON(http.StatusInternalServerError, "Error deleting product quantity")
+	}
+
+	return c.JSON(http.StatusOK, "Product removed from cart")
+
+}
+
+// GetShoppingCart
+func GetAllFromShoppingCart(c echo.Context) error {
+
+	db := c.Get("db").(*gorm.DB)
+
+	userID := c.Get("UserID")
+
+	shoppingCart := models.ShoppingCart{}
+	productQuantity := []models.ProductQuantity{}
+
+	// Get the user from the database
+	if err := db.Where("user_id = ?", userID).First(&shoppingCart).Error; err != nil {
+		fmt.Println("Error finding users Shopping cart:", err)
+		return c.JSON(http.StatusInternalServerError, "Error finding users Shopping cart")
+	}
+
+	// Get the products from the shopping cart
+	if err := db.Where("shopping_cart_id = ?", shoppingCart.ID).Find(&productQuantity).Error; err != nil {
+		fmt.Println("Error finding product quantity:", err)
+		return c.JSON(http.StatusInternalServerError, "Error finding product quantity")
+	}
+
+	shoppingCart.Products = productQuantity
+
+	return c.JSON(http.StatusOK, shoppingCart)
+
+}
