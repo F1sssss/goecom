@@ -11,13 +11,11 @@ import (
 )
 
 // AddToCart
-
 func AddToCart(c echo.Context) error {
 
 	db := c.Get("db").(*gorm.DB)
 
 	user := c.Get("UserID")
-	fmt.Println("User ID:", user)
 
 	product := models.Product{}
 
@@ -52,10 +50,6 @@ func AddToCart(c echo.Context) error {
 
 	ProductQuantity := models.ProductQuantity{Product: product, Quantity: int(quantity), ProductID: product.ID, ShoppingCartID: 0}
 
-	ProductQuantity2 := db.Create(&ProductQuantity)
-
-	fmt.Println("Product quantity:", ProductQuantity2)
-
 	// Check if the user already has a shopping cart
 	shoppingCart := models.ShoppingCart{}
 	if err := db.Where("user_id = ?", user).First(&shoppingCart).Error; err != nil {
@@ -73,38 +67,40 @@ func AddToCart(c echo.Context) error {
 
 	shoppingCart.Products = append(shoppingCart.Products, ProductQuantity)
 
-	// Check if the product is already in the shopping cart, in that case, just update the quantity
-	for _, p := range shoppingCart.Products {
+	// Check if the product is already in the shopping cart, if it's not, add it
+	if err := db.Where("product_id = ?", product.ID).Where("shopping_cart_id = ?", shoppingCart.ID).First(&ProductQuantity).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			if err := db.Create(&ProductQuantity).Error; err != nil {
+				fmt.Println("Error creating shopping cart:", err)
+				return c.JSON(http.StatusInternalServerError, "Error creating shopping cart")
+			} else {
+				shoppingCart.Products = shoppingCart.Products[:len(shoppingCart.Products)-1]
+				shoppingCart.Products = append(shoppingCart.Products, ProductQuantity)
 
-		fmt.Println("Product ID:", p.ProductID, "Product ID 2:", product.ID)
+				if err := db.Save(&shoppingCart).Error; err != nil {
+					fmt.Println("Error updating shopping cart:", err)
+					return c.JSON(http.StatusInternalServerError, "Error updating shopping cart")
+				}
 
-		if p.ProductID == product.ID {
+				return c.JSON(http.StatusOK, shoppingCart)
 
-			//Check if there is enough stock
-			if product.Stock < int(quantity)+p.Quantity {
-				return c.JSON(http.StatusBadRequest, "Not enough stock")
 			}
-
-			ProductQuantity.Quantity = quantity + p.Quantity
-
-			fmt.Println("Product quantity:", ProductQuantity)
-
-			if err := db.Save(&ProductQuantity).Error; err != nil {
-				fmt.Println("Error updating shopping cart:", err)
-				return c.JSON(http.StatusInternalServerError, "Error updating shopping cart")
-			}
-			return c.JSON(http.StatusOK, shoppingCart)
+		} else {
+			fmt.Println("Error finding product quantity:", err)
+			return c.JSON(http.StatusInternalServerError, "Error finding product quantity")
 		}
 	}
 
-	ProductQuantity.ShoppingCartID = shoppingCart.ID
+	ProductQuantity.Quantity = quantity + ProductQuantity.Quantity
 
-	// Add the product to the shopping cart
+	if err := db.Save(&ProductQuantity).Error; err != nil {
+		fmt.Println("Error updating shopping cart:", err)
+		return c.JSON(http.StatusInternalServerError, "Error updating shopping cart")
+	}
+
+	shoppingCart.Products = shoppingCart.Products[:len(shoppingCart.Products)-1]
 	shoppingCart.Products = append(shoppingCart.Products, ProductQuantity)
 
-	fmt.Println("Shopping cart:", shoppingCart)
-
-	// Update the shopping cart
 	if err := db.Save(&shoppingCart).Error; err != nil {
 		fmt.Println("Error updating shopping cart:", err)
 		return c.JSON(http.StatusInternalServerError, "Error updating shopping cart")
