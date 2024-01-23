@@ -33,3 +33,7 @@
 
 # Ignore the binary folder
 /bin/
+
+./cmd/env
+
+./goecom.exe

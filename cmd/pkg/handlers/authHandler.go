@@ -37,11 +37,17 @@ func Register(c echo.Context) error {
 
 	user.Password = hashedPassword
 	user.Verified = false
+	user.ConfirmationToken = "hdfgsahjkdfgasuykfgdasyhkfd" //TODO: Generate random token
 
 	// Create the user
 	if err := db.Create(&user).Error; err != nil {
 		fmt.Println("Error creating user:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error while creating user")
+	}
+
+	if err := utils.SendVerificationEmail(user.Email, user.ConfirmationToken); err != nil {
+		fmt.Println("Error sending verification email:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error while sending verification email")
 	}
 
 	return c.JSON(http.StatusCreated, user)
@@ -60,8 +66,8 @@ func Login(c echo.Context) error {
 	}
 
 	// Check if the user exists
-	if err := db.Where("username = ?", user.Username).First(&user).Error; err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist")
+	if err := db.Where("username = ?", user.Username).Where("verified = true").First(&user).Error; err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "User does not exist or is not verified")
 	}
 
 	// Compare the passwords
@@ -83,7 +89,6 @@ func Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"token": token,
 	})
-
 }
 
 func createCookie(name string, value string, expires time.Time) *http.Cookie {
