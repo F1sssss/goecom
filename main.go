@@ -8,6 +8,8 @@ import (
 	"github.com/F1sssss/goecom/cmd/pkg/middleware"
 	"github.com/F1sssss/goecom/cmd/pkg/models"
 	"github.com/F1sssss/goecom/cmd/pkg/routes"
+	"github.com/F1sssss/goecom/cmd/pkg/utils"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"gorm.io/gorm"
 )
@@ -61,6 +63,14 @@ func main() {
 
 	db := InitializeDatabaseConnection()
 	MigrateSchemas(db)
+
+	// Initialize utils
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+		return
+	}
+
+	utils.InitConfig()
 
 	e := echo.New()
 

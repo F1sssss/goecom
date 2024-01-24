@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/F1sssss/goecom/cmd/pkg/handlers"
+	"github.com/F1sssss/goecom/cmd/pkg/services"
 	"github.com/labstack/echo"
 )
 
@@ -14,7 +15,7 @@ func InitAuthRoutes(e *echo.Echo) {
 	//e.POST("/forgot-password", handlers.ForgotPassword)
 	//e.POST("/reset-password", handlers.ResetPassword)
 	//e.POST("/change-password", handlers.ChangePassword)
-	//e.POST("/verify-email", handlers.VerifyEmail)
+	e.GET("/verify/", services.VerifyUser)
 	//e.POST("/resend-verification-email", handlers.ResendVerificationEmail)
 	//e.GET("/me", handlers.Me)
 }

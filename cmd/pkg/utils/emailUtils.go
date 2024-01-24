@@ -5,15 +5,16 @@ import (
 )
 
 // Send Verification Email
-func SendVerificationEmail(email string, token string) error {
+func SendVerificationEmail(email string, token string, userID string) error {
+
 	m := mail.NewMessage()
-	m.SetHeader("From", "55bc385c71-49d897@inbox.mailtrap.io")
+	m.SetHeader("From", "admin@admin.com")
 	m.SetHeader("To", email)
 	m.SetHeader("Subject", "Verify your email")
 
-	m.SetBody("text/html", "Hello <b>Fis</b> </br> This is your verification link: <a href='http://localhost:3000/verify/"+token+"'>Click here</a>")
+	m.SetBody("text/html", "Hello <b>Fis</b> </br> This is your verification link: <a href='"+SERVER_URL+"/verify/?id="+userID+"&token="+token+"'>Click here</a>")
 
-	d := mail.NewDialer("sandbox.smtp.mailtrap.io", 587, "b1d945008ecdb6", "5726370061bde7")
+	d := mail.NewDialer(EMAIL_HOST, 587, EMAIL_USERNAME, EMAIL_PASSWORD)
 
 	// Send the email
 	if err := d.DialAndSend(m); err != nil {

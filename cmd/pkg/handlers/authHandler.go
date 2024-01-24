@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/F1sssss/goecom/cmd/pkg/models"
@@ -37,7 +39,12 @@ func Register(c echo.Context) error {
 
 	user.Password = hashedPassword
 	user.Verified = false
-	user.ConfirmationToken = "hdfgsahjkdfgasuykfgdasyhkfd" //TODO: Generate random token
+	user.ConfirmationToken, err = utils.HashPassword(user.Email + string(rand.Int31()))
+
+	if err != nil {
+		fmt.Println("Error hashing password:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error while hashing password")
+	}
 
 	// Create the user
 	if err := db.Create(&user).Error; err != nil {
@@ -45,7 +52,7 @@ func Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error while creating user")
 	}
 
-	if err := utils.SendVerificationEmail(user.Email, user.ConfirmationToken); err != nil {
+	if err := utils.SendVerificationEmail(user.Email, user.ConfirmationToken, strconv.FormatUint(uint64(user.ID), 10)); err != nil {
 		fmt.Println("Error sending verification email:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error while sending verification email")
 	}
@@ -84,7 +91,7 @@ func Login(c echo.Context) error {
 	}
 
 	// Create and set a cookie
-	c.SetCookie(createCookie("token", token, time.Now().Add(24*time.Hour)))
+	c.SetCookie(createCookie("token", token, time.Now().Add(time.Hour)))
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"token": token,
