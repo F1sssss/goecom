@@ -23,4 +23,10 @@ func InitProductRoutes(e *echo.Echo) {
 	protectedGroup.GET("/shoppingcart", services.GetAllFromShoppingCart)
 	protectedGroup.DELETE("/:id/shoppingcart", services.RemoveProductFromCart)
 
+	// Product Reviews
+	protectedGroup.GET("/:id/reviews", handlers.GetProductReviews)
+	protectedGroup.POST("/:id/reviews", handlers.AddReview)
+	protectedGroup.PATCH("/:id/reviews/", handlers.UpdateReview)
+	protectedGroup.DELETE("/:id/reviews/:id", handlers.DeleteReview)
+
 }

@@ -7,8 +7,8 @@ import (
 // Review Model
 type Review struct {
 	gorm.Model
-	Product Product `json:"product_id" gorm:"foreignKey:id"`
-	User    User    `json:"user_id" gorm:"foreignKey:id"`
-	Comment string  `json:"comment"`
-	Rating  int     `json:"rating"`
+	ProductRefer uint   `gorm:"not null" json:"product_refer"`
+	UserRefer    uint   `gorm:"not null" json:"user_refer"`
+	Comment      string `json:"comment"`
+	Rating       int    `json:"rating"`
 }
