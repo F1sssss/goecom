@@ -53,3 +53,18 @@ func HasRole(role string) echo.MiddlewareFunc {
 		}
 	}
 }
+
+// IsMe checks if the user is the same as the one in the token, it is used for updating and deleting own resources only
+// It is used by puttin user_id in the path and checking if it is the same as the one in the token
+func IsMe(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		claims := c.Get("UserID")
+
+		if claims != c.Param("user_id") {
+			return c.JSON(http.StatusForbidden, "Unauthorized")
+		}
+
+		return next(c)
+
+	}
+}

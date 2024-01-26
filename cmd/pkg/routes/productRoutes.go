@@ -16,6 +16,7 @@ func InitProductRoutes(e *echo.Echo) {
 
 	e.GET("/products", handlers.GetProducts)
 	e.GET("/products/:id", handlers.GetProduct)
+	e.GET("/search/products", services.SearchProducts)
 	protectedGroup.POST("", handlers.CreateProduct)
 	protectedGroup.PATCH("/:id", handlers.UpdateProduct)
 	protectedGroup.DELETE("/:id", handlers.DeleteProduct)
@@ -27,6 +28,6 @@ func InitProductRoutes(e *echo.Echo) {
 	protectedGroup.GET("/:id/reviews", handlers.GetProductReviews)
 	protectedGroup.POST("/:id/reviews", handlers.AddReview)
 	protectedGroup.PATCH("/:id/reviews/", handlers.UpdateReview)
-	protectedGroup.DELETE("/:id/reviews/:id", handlers.DeleteReview)
+	protectedGroup.DELETE("/:id/reviews/:user_id", handlers.DeleteReview)
 
 }

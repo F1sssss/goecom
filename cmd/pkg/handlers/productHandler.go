@@ -7,6 +7,7 @@ import (
 
 	"github.com/F1sssss/goecom/cmd/pkg/models"
 	"github.com/labstack/echo"
+	"gorm.io/gorm"
 )
 
 // Lock for thread safety
@@ -16,6 +17,10 @@ var lock = sync.Mutex{}
 func GetProducts(c echo.Context) error {
 
 	var products []models.Product
+
+	if c.QueryParam("category") != "" || c.QueryParam("price_min") != "" || c.QueryParam("price_max") != "" {
+		return GetFilteredProducts(c)
+	}
 
 	if err := GetAllFactory(c, &products); err != nil {
 		fmt.Println("Error getting products:", err)
@@ -84,4 +89,35 @@ func DeleteProduct(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, "Product deleted")
 
+}
+
+// GetFilteredProducts returns products filtered by any field
+func GetFilteredProducts(c echo.Context) error {
+
+	db := c.Get("db").(*gorm.DB)
+	var products []models.Product
+	query := db.Model(&products)
+
+	categories := c.QueryParams()["category"]
+	priceMin := c.QueryParam("priceMin")
+	priceMax := c.QueryParam("priceMax")
+
+	if len(categories) > 0 {
+		query = query.Where("category_id IN (?)", categories)
+	}
+
+	if priceMin != "" {
+		query = query.Where("price >= ?", priceMin)
+	}
+
+	if priceMax != "" {
+		query = query.Where("price <= ?", priceMax)
+	}
+
+	if err := query.Find(&products).Error; err != nil {
+		fmt.Println("Error getting products:", err)
+		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	return c.JSON(http.StatusOK, products)
 }

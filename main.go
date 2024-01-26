@@ -41,6 +41,10 @@ func MigrateSchemas(e *gorm.DB) {
 		panic(err)
 	}
 
+	if err := e.AutoMigrate(&models.ProductCategory{}); err != nil {
+		panic(err)
+	}
+
 	if err := e.AutoMigrate(&models.Product{}); err != nil {
 		panic(err)
 	}
